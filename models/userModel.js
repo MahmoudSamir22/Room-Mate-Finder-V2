@@ -5,7 +5,6 @@ const userSchema = mongoose.Schema(
     name: {
       type: String,
       required: [true, "Name Is Required"],
-      trim: true,
     },
     age: {
       type: Number,
@@ -34,6 +33,11 @@ const userSchema = mongoose.Schema(
       max: 11,
       trim: true,
     },
+    role: {
+      type: String,
+      enum: ["user", "admin", "manager"],
+      default: "user",
+    }
   },
   {
     timestamps: true,
