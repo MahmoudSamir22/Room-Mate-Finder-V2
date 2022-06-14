@@ -2,6 +2,7 @@ const { check, body } = require("express-validator");
 
 const validatorMiddleware = require("../../middleware/validatorMiddleware");
 const User = require("../../models/userModel");
+const ApiError = require("../apiError");
 
 exports.createUserValidator = [
   body("name")
@@ -12,7 +13,7 @@ exports.createUserValidator = [
   body("age")
     .notEmpty()
     .withMessage("Age is required")
-    .isInt({ max: 18 })
+    .isInt({ min: 18 })
     .withMessage("You must be above 18 years old"),
   body("gender").notEmpty().withMessage("Gender is required"),
   body("email")
@@ -21,7 +22,7 @@ exports.createUserValidator = [
     .isEmail()
     .withMessage("Email format is invalid")
     .custom((val) => {
-      User.findOne({ email: val }).then((user) => {
+      return User.findOne({ email: val }).then((user) => {
         if (user) {
           return Promise.reject(new Error("E-mail already in use"));
         }
@@ -71,12 +72,11 @@ exports.updateUserValidator = [
     .optional()
     .isEmail()
     .withMessage("Email format is invalid")
-    .custom((val) => {
-      User.findOne({ email: val }).then((user) => {
-        if (user) {
-          return Promise.reject(new Error("E-mail already in use"));
-        }
-      });
+    .custom(async (val) => {
+      const user = await User.findOne({ email: val });
+      if (user) {
+        throw new Error("E-mail already in use");
+      }
     }),
   body("phone").optional().isMobilePhone("ar-EG"),
   validatorMiddleware,
