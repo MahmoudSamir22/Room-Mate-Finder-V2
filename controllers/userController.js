@@ -1,5 +1,7 @@
 const asyncHandler = require("express-async-handler");
+const bcrypt = require("bcryptjs");
 
+const ApiError = require("../utils/apiError");
 const User = require("../models/userModel");
 
 exports.addUser = asyncHandler(async (req, res, next) => {
@@ -54,4 +56,19 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
     );
   }
   res.status(204).json();
+});
+
+exports.changePassword = asyncHandler(async (req, res, next) => {
+  const { oldPassword, newPassword } = req.body;
+  const user = await User.findById(req.user._id);
+  const isEqual = await bcrypt.compare(oldPassword, user.password);
+  if (!isEqual) {
+    return next(new ApiError("Password incorrect", 400));
+  }
+  await User.findByIdAndUpdate(req.user._id, {
+    password: await bcrypt.hash(newPassword, 12),
+  });
+  res
+    .status(200)
+    .json({ status: "success", message: "Password updated successfully" });
 });

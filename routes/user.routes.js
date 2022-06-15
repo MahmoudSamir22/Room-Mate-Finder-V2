@@ -5,6 +5,7 @@ const {
   getUser,
   updateUser,
   deleteUser,
+  changePassword,
 } = require("../controllers/userController");
 
 const {
@@ -14,12 +15,18 @@ const {
   updateUserValidator,
 } = require("../utils/validators/userValidator");
 
-router.route("/").post(createUserValidator, addUser).get(getUsers);
+const { auth } = require("../controllers/authController");
+
+router.route("/").post(createUserValidator, addUser).get(auth, getUsers);
+
+router.use(auth);
 
 router
   .route("/:id")
   .get(getUserValidator, getUser)
   .put(updateUserValidator, updateUser)
   .delete(deleteUserValidator, deleteUser);
+
+router.put("/changePassword/:id", changePassword);
 
 module.exports = router;
