@@ -1,7 +1,10 @@
+const crypto = require("crypto");
+
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const { sendEmail } = require("../utils/sendEmail");
 const { generateToken } = require("../utils/generateToken");
 const ApiError = require("../utils/apiError");
 const User = require("../models/userModel");
@@ -68,8 +71,81 @@ exports.allowedTo = (...roles) =>
       );
     }
     next();
+  });
 
+// Forget Password
+
+exports.forgetPassword = asyncHandler(async (req, res, next) => {
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new ApiError("No user with this email", 404));
+  }
+  const resetCode = Math.floor(1000 + Math.random() * 900000).toString();
+  const hashedResetCode = crypto
+    .createHash("sha256")
+    .update(resetCode)
+    .digest("hex");
+
+  user.passwordResetCode = hashedResetCode;
+  user.passwordResetExpirs = Date.now() + 10 * 60 * 1000;
+  user.passwordResetVerified = false;
+  await user.save();
+
+  const message = `Hi ${user.name}, \nWe have recived a request to change the password on your Room Mate Finder account. \n ${resetCode}`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: "Password Reset Code (Valid for 10 mins)",
+      message,
+    });
+  } catch (error) {
+    user.passwordResetCode = undefined;
+    user.passwordResetExpirs = undefined;
+    user.passwordResetVerified = undefined;
+    await user.save();
+    console.log(error.message);
+    return next(new ApiError("There was an Error sending this email", 500));
+  }
+
+  res
+    .status(200)
+    .json({ status: "Success", message: "Reset code sent successfully" });
 });
 
+exports.verifyResetCode = asyncHandler(async (req, res, next) => {
+  const hashedResetCode = crypto
+    .createHash("sha256")
+    .update(req.body.resetCode)
+    .digest("hex");
+  const user = await User.findOne({
+    passwordResetCode: hashedResetCode,
+    passwordResetExpirs: {$gte: Date.now()}
+  })
+  if(!user){
+    return next(new ApiError('Invalid or expired reset code', 404))
+  }
+  user.passwordResetVerified = true
+  await user.save()
+  res.status(200).json({ status: "success" });
+});
 
-// Forget Password 
+exports.resetPassword = asyncHandler(async (req, res, next) => {
+  const user = await User.findOne({email: req.body.email})
+  if(!user){
+    return next(new ApiError("No user found with this email", 404));
+  }
+  if(!user.passwordResetVerified){
+    return next(new ApiError("Reset Code not verified", 400));
+  }
+  user.password = req.body.newPassword;
+  user.passwordResetCode = undefined;
+  user.passwordResetExpirs = undefined;
+  user.passwordResetVerified = undefined;
+
+  await user.save();
+
+  
+  const token = generateToken(user._id)
+  res.status(200).json({token})
+})

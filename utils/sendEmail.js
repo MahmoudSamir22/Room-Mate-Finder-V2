@@ -1,26 +1,23 @@
 const nodemailer = require("nodemailer");
 
-const sendEmail = async (options) => {
-    const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        secure: true,
-        port: 465,
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASSWORD
-        }
-    })
+exports.sendEmail = async (options) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    host: process.env.EMAIL_HOST,
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+  });
 
-    const emailOptions = {
-        from: 'Room Mate Finder',
-        to: options.email,
-        subject: options.subject,
-        text: options.message
-    }
+  const emailOptions = {
+    from: "Room Mate Finder",
+    to: options.email,
+    subject: options.subject,
+    text: options.message,
+  };
 
-    await transporter.sendMail(emailOptions)
-
-}
-
-
-module.exports = sendEmail
+  await transporter.sendMail(emailOptions);
+};
