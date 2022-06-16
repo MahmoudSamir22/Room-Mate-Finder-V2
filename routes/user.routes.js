@@ -27,6 +27,6 @@ router
   .put(updateUserValidator, updateUser)
   .delete(deleteUserValidator, deleteUser);
 
-router.put("/changePassword/:id", changePassword);
+router.put("/changePassword/:id", auth, changePassword);
 
 module.exports = router;

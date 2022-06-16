@@ -6,6 +6,8 @@ const {
   getRoom,
   updateRoom,
   deleteRoom,
+  uploadRoomImages,
+  resizeRoomImages,
 } = require("../controllers/roomController");
 const {
   createRoomValidator,
@@ -14,12 +16,18 @@ const {
   updateRoomValidator,
 } = require("../utils/validators/roomValidator");
 
-router.route("/").get(getRooms).post(createRoomValidator, addRoom);
+const { auth } = require("../controllers/authController");
+
+router
+  .route("/")
+  .post(auth, uploadRoomImages, resizeRoomImages, createRoomValidator, addRoom)
+  .get(getRooms);
+
 
 router
   .route("/:id")
   .get(getRoomValidator, getRoom)
-  .put(updateRoomValidator, updateRoom)
-  .delete(deleteRoomValidator, deleteRoom);
+  .put(auth, updateRoomValidator, updateRoom)
+  .delete(auth, deleteRoomValidator, deleteRoom);
 
 module.exports = router;

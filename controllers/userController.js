@@ -60,8 +60,7 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
 
 exports.changePassword = asyncHandler(async (req, res, next) => {
   const { oldPassword, newPassword } = req.body;
-  const user = await User.findById(req.user._id);
-  const isEqual = await bcrypt.compare(oldPassword, user.password);
+  const isEqual = await bcrypt.compare(oldPassword, req.user.password);
   if (!isEqual) {
     return next(new ApiError("Password incorrect", 400));
   }

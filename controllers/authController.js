@@ -6,7 +6,18 @@ const { generateToken } = require("../utils/generateToken");
 const ApiError = require("../utils/apiError");
 const User = require("../models/userModel");
 
-exports.signUp = asyncHandler(async (req, res, next) => {});
+exports.signUp = asyncHandler(async (req, res, next) => {
+  const user = await User.create({
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+    gender: req.body.gender,
+    age: req.body.age,
+    phone: req.body.phone,
+  });
+  await user.save();
+  res.status(201).json({ status: "Success", data: user });
+});
 
 exports.login = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({ email: req.body.email });
@@ -57,4 +68,8 @@ exports.allowedTo = (...roles) =>
       );
     }
     next();
-  });
+
+});
+
+
+// Forget Password 
