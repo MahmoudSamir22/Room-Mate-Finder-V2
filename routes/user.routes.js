@@ -6,6 +6,8 @@ const {
   updateUser,
   deleteUser,
   changePassword,
+  uploadUserImage,
+  resizeProfileImage
 } = require("../controllers/userController");
 
 const {
@@ -17,7 +19,7 @@ const {
 
 const { auth } = require("../controllers/authController");
 
-router.route("/").post(createUserValidator, addUser).get(auth, getUsers);
+router.route("/").post(uploadUserImage, resizeProfileImage, createUserValidator, addUser).get(auth, getUsers);
 
 router.use(auth);
 

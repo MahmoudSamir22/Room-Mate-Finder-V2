@@ -58,6 +58,11 @@ const roomSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+roomSchema.pre(/^find/, (function (next){
+  this.populate({path: 'owner', select: 'name phone'})
+  next()
+}))
+
 const Room = mongoose.model("Room", roomSchema);
 
 module.exports = Room;

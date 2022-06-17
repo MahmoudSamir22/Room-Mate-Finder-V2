@@ -40,7 +40,9 @@ const userSchema = mongoose.Schema(
     passwordChangedAt: Date,
     passwordResetCode: String,
     passwordResetExpirs: Date,
-    passwordResetVerified: Boolean
+    passwordResetVerified: Boolean,
+    isSub: { type: Boolean, default: false },
+    profileImg: String
   },
   {
     timestamps: true,

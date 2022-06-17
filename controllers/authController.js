@@ -19,7 +19,8 @@ exports.signUp = asyncHandler(async (req, res, next) => {
     phone: req.body.phone,
   });
   await user.save();
-  res.status(201).json({ status: "Success", data: user });
+  const token = generateToken(user._id)
+  res.status(201).json({ status: "Success", data: user, token });
 });
 
 exports.login = asyncHandler(async (req, res, next) => {
@@ -30,6 +31,14 @@ exports.login = asyncHandler(async (req, res, next) => {
   const token = generateToken(user._id);
   res.status(200).json({ status: "Success", data: user, token });
 });
+
+exports.getLoggedUserData = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user._id)
+  if(!user) {
+    return next(new ApiError('Something went wrong', 404))
+  }
+  res.status(200).json({ status: "Success", data: user})
+})
 
 exports.auth = asyncHandler(async (req, res, next) => {
   // 1) check if token exist, if exists hold it
@@ -73,7 +82,6 @@ exports.allowedTo = (...roles) =>
     next();
   });
 
-// Forget Password
 
 exports.forgetPassword = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({ email: req.body.email });

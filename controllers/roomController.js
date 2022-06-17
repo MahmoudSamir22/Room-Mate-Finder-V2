@@ -3,8 +3,8 @@ const sharp = require("sharp");
 const { v4: uuidv4 } = require("uuid");
 
 const { uploadMixOfImages } = require("../middleware/uploadImageMiddleware");
+const factoryHandler = require('./handler')
 const ApiError = require("../utils/apiError");
-const ApiFeatures = require("../utils/apiFeatures");
 const Room = require("../models/roomModel");
 
 exports.resizeRoomImages = asyncHandler(async (req, res, next) => {
@@ -27,7 +27,18 @@ exports.resizeRoomImages = asyncHandler(async (req, res, next) => {
 
 exports.uploadRoomImages = uploadMixOfImages("images");
 
-exports.addRoom = asyncHandler(async (req, res) => {
+exports.addRoom = asyncHandler(async (req, res, next) => {
+  if (!req.user.isSub) {
+    const room = await Room.findOne({ owner: req.user._id });
+    if (room) {
+      return next(
+        new ApiError(
+          "You can't add more than one room you have to be a subscriber first",
+          400
+        )
+      );
+    }
+  }
   const room = await Room.create({
     city: req.body.city,
     area: req.body.area,
@@ -44,51 +55,10 @@ exports.addRoom = asyncHandler(async (req, res) => {
   res.status(201).json({ status: "Success", data: room });
 });
 
-exports.getRooms = asyncHandler(async (req, res) => {
-  const countDocuments = await Room.countDocuments();
-  const apiFeatures = new ApiFeatures(Room.find(), req.query)
-    .sort()
-    .limitFields()
-    .paginate(countDocuments)
-    .filtering()
-    .search()
-  const { mongooseQuery, paginationResult } = apiFeatures;
-  const rooms = await mongooseQuery;
-  res.status(200).json({
-    paginationResult,
-    result: rooms.length,
-    data: rooms,
-  });
-});
+exports.getRooms = factoryHandler.getAll(Room)
 
-exports.getRoom = asyncHandler(async (req, res, next) => {
-  const room = await Room.findById(req.params.id);
-  if (!room) {
-    return next(
-      new ApiError(`There is no room with this id: ${req.params.id}`, 404)
-    );
-  }
-  res.status(200).json({ status: "Success", data: room });
-});
+exports.getRoom =factoryHandler.getOne(Room)
 
-exports.updateRoom = asyncHandler(async (req, res, next) => {
-  const room = await Room.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
-  if (!room) {
-    return next(
-      new ApiError(`There is no room with this id: ${req.params.id}`, 404)
-    );
-  }
-  res.status(200).json({ status: "Success", data: room });
-});
+exports.updateRoom = factoryHandler.updateOne(Room)
 
-exports.deleteRoom = asyncHandler(async (req, res, next) => {
-  const room = await Room.findByIdAndDelete(req.params.id);
-  if (!room) {
-    return next(
-      new ApiError(`There is no room with this id: ${req.params.id}`, 404)
-    );
-  }
-  res.status(204).json();
-});
+exports.deleteRoom = factoryHandler.deleteOne(Room)
