@@ -1,6 +1,8 @@
 const asyncHandler = require("express-async-handler");
 
+const {deleteImgsFromServer} = require('../utils/deleteImages')
 const ApiFeatures = require("../utils/apiFeatures");
+
 
 exports.getAll = (Model) =>
   asyncHandler(async (req, res) => {
@@ -31,7 +33,7 @@ exports.getOne = (Model) =>
     res.status(200).json({ status: "Success", data: document });
   });
 
-exports.deleteOne = (Model) =>
+exports.deleteOne = (Model, modelName = "") =>
   asyncHandler(async (req, res, next) => {
     const document = await Model.findByIdAndDelete(req.params.id);
     if (!document) {
@@ -39,6 +41,7 @@ exports.deleteOne = (Model) =>
         new ApiError(`There is no document with this id: ${req.params.id}`, 404)
       );
     }
+    deleteImgsFromServer(document, modelName)
     res.status(204).json();
   });
 

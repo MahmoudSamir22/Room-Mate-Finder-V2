@@ -4,6 +4,7 @@ const { v4: uuidv4 } = require("uuid");
 
 const { uploadMixOfImages } = require("../middleware/uploadImageMiddleware");
 const factoryHandler = require('./handler')
+const {deleteImgsFromServer} = require('../utils/deleteImages')
 const ApiError = require("../utils/apiError");
 const Room = require("../models/roomModel");
 
@@ -31,6 +32,7 @@ exports.addRoom = asyncHandler(async (req, res, next) => {
   if (!req.user.isSub) {
     const room = await Room.findOne({ owner: req.user._id });
     if (room) {
+      deleteImgsFromServer(req.body, 'Room')
       return next(
         new ApiError(
           "You can't add more than one room you have to be a subscriber first",
@@ -61,4 +63,4 @@ exports.getRoom =factoryHandler.getOne(Room)
 
 exports.updateRoom = factoryHandler.updateOne(Room)
 
-exports.deleteRoom = factoryHandler.deleteOne(Room)
+exports.deleteRoom = factoryHandler.deleteOne(Room, 'Room')

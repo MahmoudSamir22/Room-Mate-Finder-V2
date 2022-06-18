@@ -1,3 +1,5 @@
+const fs = require('fs')
+
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");
 const sharp = require("sharp");
@@ -55,7 +57,7 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
   res.status(200).json({ status: "Success", data: user });
 });
 
-exports.deleteUser = factoryHandler.deleteOne(User);
+exports.deleteUser = factoryHandler.deleteOne(User, 'User');
 
 exports.changePassword = asyncHandler(async (req, res, next) => {
   const { oldPassword, newPassword } = req.body;
@@ -70,3 +72,14 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
     .status(200)
     .json({ status: "success", message: "Password updated successfully" });
 });
+
+// this how i can delete files use it after errors from validators and after delete user or rooms (this is a reminder for me and this function is userless)
+
+exports.deleteImage = asyncHandler(async (req, res, next) => {
+  fs.unlink(`./uploads/users/${req.body.image}`, (err)=> {
+    if(err){
+      console.log(err);
+    }
+  })
+  res.status(204).send('Deleted')
+})

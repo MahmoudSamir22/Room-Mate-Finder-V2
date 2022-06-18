@@ -31,6 +31,16 @@ exports.updateRoomValidator = [
           throw new Error("This room is not yours you can't update it");
         }
       }
+      console.log(req.user);
+      if (!req.user.isSub) {
+        const room = await Room.findOne({ owner: req.user._id });
+        if (room) {
+          console.log("From Validator");
+          throw new Error(
+            "You can't add more than one room you have to be a subscriber first"
+          );
+        }
+      }
     }),
   body("description")
     .optional()
@@ -55,7 +65,7 @@ exports.deleteRoomValidator = [
     .custom(async (val, { req }) => {
       const room = await Room.findById(val);
       if (req.user.role === "user") {
-        if (room.owner.toString() !== req.user._id.toString()) {
+        if (room.owner._id.toString() !== req.user._id.toString()) {
           throw new Error("This room is not yours you can't delete it");
         }
       }
