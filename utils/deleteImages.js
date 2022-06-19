@@ -25,12 +25,13 @@ exports.deleteImgsFromServer = async (document, modelName = "") => {
     }
     const rooms = await Room.find({ owner: document._id });
     if (rooms) {
-      rooms.map((room) => {
+      rooms.map(async (room) => {
         if (room.images) {
           room.images.map((img) => {
             deleteImages(`./uploads/rooms/${img}`);
           });
         }
+        await Room.findByIdAndDelete(room._id)
       });
     }
   }

@@ -59,7 +59,7 @@ const roomSchema = new mongoose.Schema(
 );
 
 roomSchema.pre(/^find/, (function (next){
-  this.populate({path: 'owner', select: 'name phone'})
+  this.populate({path: 'owner', select: 'name phone gender'})
   next()
 }))
 

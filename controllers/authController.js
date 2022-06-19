@@ -17,6 +17,7 @@ exports.signUp = asyncHandler(async (req, res, next) => {
     gender: req.body.gender,
     age: req.body.age,
     phone: req.body.phone,
+    profileImg: req.body.profileImg,
   });
   await user.save();
   const token = generateToken(user._id)
