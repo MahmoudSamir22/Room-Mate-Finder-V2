@@ -33,14 +33,14 @@ app.post('/sub-webhook', async (req, res) => {
     let signature = req.headers["stripe-signature"];
 
     try {
-      console.log(`body: ${JSON.stringify(req.body)},signature: ${signature}`);
+      console.log(`signature: ${signature}`);
       event = stripe.webhooks.constructEvent(
         req.body,
         signature,
         webhookSecret
       );
     } catch (err) {
-      console.log(err);
+      console.log('Error: ', err);
       console.log(`⚠️  Webhook signature verification failed.`);
       return res.sendStatus(400);
     }
