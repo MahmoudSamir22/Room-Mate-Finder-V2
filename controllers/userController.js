@@ -76,10 +76,9 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
 });
 
 exports.createCheckOutSession = asyncHandler(async (req, res) => {
-  const user = {user: req.user._id}
   const priceId = req.body.priceId;
   const session = await stripe.checkout.sessions.create({
-    billing_address_collection: "auto",
+    // billing_address_collection: "auto",
     line_items: [
       {
         price: priceId,
@@ -90,8 +89,7 @@ exports.createCheckOutSession = asyncHandler(async (req, res) => {
     success_url: `${req.protocol}://${req.get("host")}/api/v1/rooms`,
     cancel_url: `${req.protocol}://${req.get("host")}/`,
     customer_email: req.user.email,
-    metadata: user,
-    client_reference_id: req.user._id
+    client_reference_id: req.user._id.toString(),
   });
 
   res.status(200).json({ status: "success", data: session });
@@ -128,8 +126,6 @@ exports.webHookCheckOut = asyncHandler(async (req, res) => {
   }
   if (eventType === 'invoice.paid') {
     console.log(`Paied successfully and now is sub`);
-    console.log(data.object);
-    console.log(data.object.metadata);
   }
   res.status(200).json({message: 'Done'});
 });
