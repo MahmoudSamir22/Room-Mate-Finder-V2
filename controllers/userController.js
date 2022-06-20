@@ -103,10 +103,9 @@ exports.webHookCheckOut = asyncHandler(async (req, res) => {
   if (webhookSecret) {
     // Retrieve the event by verifying the signature using the raw body and secret.
     let event;
-    let signature = req.headers["stripe-signature"];
+    const signature = req.headers['stripe-signature']
 
     try {
-      console.log(`signature: ${signature}`);
       event = stripe.webhooks.constructEvent(
         req.body,
         signature,
