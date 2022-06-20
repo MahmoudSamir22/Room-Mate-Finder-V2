@@ -89,7 +89,7 @@ exports.createCheckOutSession = asyncHandler(async (req, res) => {
     success_url: `${req.protocol}://${req.get("host")}/api/v1/rooms`,
     cancel_url: `${req.protocol}://${req.get("host")}/`,
     customer_email: req.user.email,
-    client_reference_id: req.user_id,
+    metadata: {user: req.user._id},
   });
 
   res.status(200).json({ status: "success", data: session });
@@ -112,8 +112,6 @@ exports.webHookCheckOut = asyncHandler(async (req, res) => {
         webhookSecret
       );
     } catch (err) {
-      console.log("Error: ", err);
-      console.log(err.message);
       console.log(`⚠️  Webhook signature verification failed.`);
       return res.status(400).send();
     }
@@ -128,6 +126,7 @@ exports.webHookCheckOut = asyncHandler(async (req, res) => {
   }
   if (eventType === 'invoice.paid') {
     console.log(`Paied successfully and now is sub`);
+    console.log();
   }
   res.status(200).json({message: 'Done'});
 });
