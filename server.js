@@ -32,12 +32,14 @@ app.post('/sub-webhook', async (req, res) => {
     let signature = req.headers["stripe-signature"];
 
     try {
+      console.log(signature);
       event = stripe.webhooks.constructEvent(
         req.body,
         signature,
         webhookSecret
       );
     } catch (err) {
+      console.log(err.message);
       console.log(`⚠️  Webhook signature verification failed.`);
       return res.sendStatus(400);
     }
@@ -53,6 +55,7 @@ app.post('/sub-webhook', async (req, res) => {
   if(eventType.invoice.paid){
     console.log(`Paied successfully and now is sub`)
   }
+  res.sendStatus(200);
 })
 app.use("*", (req, res, next) => {
   next(new ApiError(`Can't find this route ${req.originalUrl}`, 404));
