@@ -76,6 +76,7 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
 });
 
 exports.createCheckOutSession = asyncHandler(async (req, res) => {
+  const user = {user: req.user._id}
   const priceId = req.body.priceId;
   const session = await stripe.checkout.sessions.create({
     billing_address_collection: "auto",
@@ -89,8 +90,8 @@ exports.createCheckOutSession = asyncHandler(async (req, res) => {
     success_url: `${req.protocol}://${req.get("host")}/api/v1/rooms`,
     cancel_url: `${req.protocol}://${req.get("host")}/`,
     customer_email: req.user.email,
-    metadata: {user: req.user._id},
-    user: req.user._id
+    metadata: user,
+    client_reference_id: req.user._id
   });
 
   res.status(200).json({ status: "success", data: session });
