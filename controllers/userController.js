@@ -75,13 +75,13 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
 });
 
 exports.createCheckOutSession = asyncHandler(async (req, res) => {
-  const priceId = req.body.priceId
+  const priceId = req.body.priceId;
   const session = await stripe.checkout.sessions.create({
     billing_address_collection: "auto",
     line_items: [
       {
         price: priceId,
-        quantity: 1
+        quantity: 1,
       },
     ],
     mode: "subscription",
@@ -92,4 +92,41 @@ exports.createCheckOutSession = asyncHandler(async (req, res) => {
   });
 
   res.status(200).json({ status: "success", data: session });
+});
+
+exports.webHookCheckOut = asyncHandler(async (req, res) => {
+  let data;
+  let eventType;
+  // Check if webhook signing is configured.
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (webhookSecret) {
+    // Retrieve the event by verifying the signature using the raw body and secret.
+    let event;
+    let signature = req.headers["stripe-signature"];
+
+    try {
+      console.log(`signature: ${signature}`);
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        signature,
+        webhookSecret
+      );
+    } catch (err) {
+      console.log("Error: ", err);
+      console.log(`⚠️  Webhook signature verification failed.`);
+      return res.sendStatus(400);
+    }
+    // Extract the object from the event.
+    data = event.data;
+    eventType = event.type;
+  } else {
+    // Webhook signing is recommended, but if the secret is not configured in `config.js`,
+    // retrieve the event data directly from the request body.
+    data = req.body.data;
+    eventType = req.body.type;
+  }
+  if (eventType.invoice.paid) {
+    console.log(`Paied successfully and now is sub`);
+  }
+  res.sendStatus(200);
 });
