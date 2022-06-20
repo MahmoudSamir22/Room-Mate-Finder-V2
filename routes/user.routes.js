@@ -7,7 +7,8 @@ const {
   deleteUser,
   changePassword,
   uploadUserImage,
-  resizeProfileImage
+  resizeProfileImage,
+  createCheckOutSession
 } = require("../controllers/userController");
 
 const {
@@ -22,6 +23,8 @@ const { auth } = require("../controllers/authController");
 router.route("/").post(uploadUserImage, resizeProfileImage, createUserValidator, addUser).get(auth, getUsers);
 
 router.use(auth);
+
+router.post('/create-checkout-session', createCheckOutSession)
 
 router
   .route("/:id")

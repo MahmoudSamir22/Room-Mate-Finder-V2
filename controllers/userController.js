@@ -1,9 +1,10 @@
-const fs = require('fs')
+const fs = require("fs");
 
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");
 const sharp = require("sharp");
 const { v4: uuidv4 } = require("uuid");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const { uploadSingleImage } = require("../middleware/uploadImageMiddleware");
 
@@ -57,7 +58,7 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
   res.status(200).json({ status: "Success", data: user });
 });
 
-exports.deleteUser = factoryHandler.deleteOne(User, 'User');
+exports.deleteUser = factoryHandler.deleteOne(User, "User");
 
 exports.changePassword = asyncHandler(async (req, res, next) => {
   const { oldPassword, newPassword } = req.body;
@@ -73,13 +74,22 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
     .json({ status: "success", message: "Password updated successfully" });
 });
 
-// this how i can delete files use it after errors from validators and after delete user or rooms (this is a reminder for me and this function is userless)
+exports.createCheckOutSession = asyncHandler(async (req, res) => {
+  const priceId = req.body.priceId
+  const session = await stripe.checkout.sessions.create({
+    billing_address_collection: "auto",
+    line_items: [
+      {
+        price: priceId,
+        quantity: 1
+      },
+    ],
+    mode: "subscription",
+    success_url: `${req.protocol}://${req.get("host")}/api/v1/rooms`,
+    cancel_url: `${req.protocol}://${req.get("host")}/`,
+    customer_email: req.user.email,
+    client_reference_id: req.user_id,
+  });
 
-exports.deleteImage = asyncHandler(async (req, res, next) => {
-  fs.unlink(`./uploads/users/${req.body.image}`, (err)=> {
-    if(err){
-      console.log(err);
-    }
-  })
-  res.status(204).send('Deleted')
-})
+  res.status(200).json({ status: "success", data: session });
+});
