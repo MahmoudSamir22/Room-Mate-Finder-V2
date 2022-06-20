@@ -3,6 +3,7 @@ const path = require("path");
 const express = require("express");
 require("dotenv").config({ path: "./config.env" });
 const cors = require("cors");
+const stripe = require('stripe')
 
 const mountRoutes = require("./routes/index");
 const globalError = require("./middleware/errorsMiddleware");
@@ -32,14 +33,12 @@ app.post('/sub-webhook', async (req, res) => {
     let signature = req.headers["stripe-signature"];
 
     try {
-      console.log(`body: ${JSON.stringify(req.body)},signature: ${signature}`);
       event = stripe.webhooks.constructEvent(
         req.body,
         signature,
         webhookSecret
       );
     } catch (err) {
-      console.log(err);
       console.log(`⚠️  Webhook signature verification failed.`);
       return res.sendStatus(400);
     }
