@@ -11,6 +11,7 @@ const { uploadSingleImage } = require("../middleware/uploadImageMiddleware");
 const factoryHandler = require("./handler");
 const ApiError = require("../utils/apiError");
 const User = require("../models/userModel");
+const { login } = require("./authController");
 
 exports.resizeProfileImage = asyncHandler(async (req, res, next) => {
   if (req.file) {
@@ -113,8 +114,9 @@ exports.webHookCheckOut = asyncHandler(async (req, res) => {
       );
     } catch (err) {
       console.log("Error: ", err);
+      console.log(err.message);
       console.log(`⚠️  Webhook signature verification failed.`);
-      return res.sendStatus(400);
+      return res.status(400).send();
     }
     // Extract the object from the event.
     data = event.data;
@@ -128,5 +130,5 @@ exports.webHookCheckOut = asyncHandler(async (req, res) => {
   if (eventType.invoice.paid) {
     console.log(`Paied successfully and now is sub`);
   }
-  res.sendStatus(200);
+  res.status(200).send({message: 'Done'});
 });
