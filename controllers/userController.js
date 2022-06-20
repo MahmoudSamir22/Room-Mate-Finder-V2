@@ -127,8 +127,8 @@ exports.webHookCheckOut = asyncHandler(async (req, res) => {
     data = req.body.data;
     eventType = req.body.type;
   }
-  if (eventType.invoice.paid) {
+  if (eventType === 'invoice.paid') {
     console.log(`Paied successfully and now is sub`);
   }
-  res.status(200).send({message: 'Done'});
+  res.status(200).json({message: 'Done'});
 });
