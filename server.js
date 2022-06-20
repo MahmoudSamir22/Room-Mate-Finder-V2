@@ -32,7 +32,7 @@ app.post('/sub-webhook', async (req, res) => {
     let signature = req.headers["stripe-signature"];
 
     try {
-      console.log(signature);
+      console.log(`body: ${req.body},signature: ${signature}`);
       event = stripe.webhooks.constructEvent(
         req.body,
         signature,
