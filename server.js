@@ -25,7 +25,7 @@ app.post('/sub-webhook', async (req, res) => {
   let data;
   let eventType;
   // Check if webhook signing is configured.
-  const webhookSecret = process.env.STRIPE-WEBHOOK_SECRET;
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (webhookSecret) {
     // Retrieve the event by verifying the signature using the raw body and secret.
     let event;
