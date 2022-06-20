@@ -18,11 +18,13 @@ const app = express();
 app.use(cors());
 app.options("*", cors());
 
+//WebHook For subscription
+app.post('/sub-webhook', express.raw({type: 'application/json'}),  webHookCheckOut)
+
 app.use(express.json({ limit: "20kb" }));
 app.use(express.static(path.join(__dirname, "uploads")));
 
 mountRoutes(app);
-app.post('/sub-webhook', express.raw({type: 'application/json'}),  webHookCheckOut)
 app.use("*", (req, res, next) => {
   next(new ApiError(`Can't find this route ${req.originalUrl}`, 404));
 });
