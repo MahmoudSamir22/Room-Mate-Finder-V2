@@ -90,6 +90,7 @@ exports.createCheckOutSession = asyncHandler(async (req, res) => {
     cancel_url: `${req.protocol}://${req.get("host")}/`,
     customer_email: req.user.email,
     metadata: {user: req.user._id},
+    user: req.user._id
   });
 
   res.status(200).json({ status: "success", data: session });
@@ -126,7 +127,7 @@ exports.webHookCheckOut = asyncHandler(async (req, res) => {
   }
   if (eventType === 'invoice.paid') {
     console.log(`Paied successfully and now is sub`);
-    console.log();
+    console.log(data);
   }
   res.status(200).json({message: 'Done'});
 });
