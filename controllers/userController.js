@@ -129,9 +129,8 @@ exports.webHookCheckOut = asyncHandler(async (req, res) => {
     data = req.body.data;
     eventType = req.body.type;
   }
-  if (eventType === 'invoice.paid') {
+  if (eventType === 'checkout.session.completed') {
     console.log(`Paied successfully and now is sub`);
-    console.log(data.object);
     changeUserToSub(data.object)
   }
   res.status(200).json({message: 'Done'});
