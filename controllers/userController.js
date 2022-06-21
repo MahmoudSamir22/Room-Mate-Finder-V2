@@ -89,7 +89,7 @@ exports.createCheckOutSession = asyncHandler(async (req, res) => {
     success_url: `${req.protocol}://${req.get("host")}/api/v1/rooms`,
     cancel_url: `${req.protocol}://${req.get("host")}/`,
     customer_email: req.user.email,
-    client_reference_id: req.user._id.toString(),
+    metadata: req.body.userId,
   });
 
   res.status(200).json({ status: "success", data: session });
