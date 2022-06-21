@@ -95,6 +95,11 @@ exports.createCheckOutSession = asyncHandler(async (req, res) => {
   res.status(200).json({ status: "success", data: session });
 });
 
+const changeUserToSub = async (session) => {
+  const userId = session.client_reference_id
+  await User.findByIdAndUpdate(userId, {isSub: true}, {new: true})
+}
+
 exports.webHookCheckOut = asyncHandler(async (req, res) => {
   let data;
   let eventType;
@@ -126,6 +131,9 @@ exports.webHookCheckOut = asyncHandler(async (req, res) => {
   }
   if (eventType === 'invoice.paid') {
     console.log(`Paied successfully and now is sub`);
+    console.log(data.object);
+    changeUserToSub(data.object)
   }
   res.status(200).json({message: 'Done'});
 });
+
