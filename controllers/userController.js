@@ -28,16 +28,28 @@ exports.resizeProfileImage = asyncHandler(async (req, res, next) => {
 
 exports.uploadUserImage = uploadSingleImage("profileImg");
 
+// @desc Add new User data
+// @route POST /api/v1/users/
+// @access Public
 exports.addUser = asyncHandler(async (req, res, next) => {
   const user = await User.create(req.body);
   await user.save();
   res.status(201).json({ data: user });
 });
 
+// @desc Get all users data
+// @route GET /api/v1/users/
+// @access Private/Admin
 exports.getUsers = factoryHandler.getAll(User);
 
+// @desc Get spesific user data
+// @route GET /api/v1/users/
+// @access Private/Admin/User
 exports.getUser = factoryHandler.getOne(User);
 
+// @desc Update specific user data
+// @route PUT /api/v1/users/
+// @access Private/Admin/User
 exports.updateUser = asyncHandler(async (req, res, next) => {
   const user = await User.findByIdAndUpdate(
     req.params.id,
@@ -59,8 +71,14 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
   res.status(200).json({ status: "Success", data: user });
 });
 
+// @desc Delete spesific user data
+// @route DELETE /api/v1/users/
+// @access Private/Admin/User
 exports.deleteUser = factoryHandler.deleteOne(User, "User");
 
+// @desc Get spesific user data
+// @route PUT /api/v1/users/
+// @access Private/User
 exports.changePassword = asyncHandler(async (req, res, next) => {
   const { oldPassword, newPassword } = req.body;
   const isEqual = await bcrypt.compare(oldPassword, req.user.password);
@@ -75,6 +93,9 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
     .json({ status: "success", message: "Password updated successfully" });
 });
 
+// @desc Get checkout sesssion
+// @route POST /api/v1/users/create-checkout-session
+// @access Private/User
 exports.createCheckOutSession = asyncHandler(async (req, res) => {
   const priceId = req.body.priceId;
   const session = await stripe.checkout.sessions.create({
@@ -95,11 +116,16 @@ exports.createCheckOutSession = asyncHandler(async (req, res) => {
   res.status(200).json({ status: "success", data: session });
 });
 
+// @desc Change user isSub status to true
+// @route Local function
+// @access Private
 const changeUserToSub = async (session) => {
-  const userId = session.client_reference_id
-  await User.findByIdAndUpdate(userId, {isSub: true}, {new: true})
-}
-
+  const userId = session.client_reference_id;
+  await User.findByIdAndUpdate(userId, { isSub: true }, { new: true });
+};
+// @desc Change user isSub status to true if paid
+// @route POST /sub-webhook
+// @access Public
 exports.webHookCheckOut = asyncHandler(async (req, res) => {
   let data;
   let eventType;
@@ -108,7 +134,7 @@ exports.webHookCheckOut = asyncHandler(async (req, res) => {
   if (webhookSecret) {
     // Retrieve the event by verifying the signature using the raw body and secret.
     let event;
-    const signature = req.headers['stripe-signature']
+    const signature = req.headers["stripe-signature"];
 
     try {
       event = stripe.webhooks.constructEvent(
@@ -129,10 +155,9 @@ exports.webHookCheckOut = asyncHandler(async (req, res) => {
     data = req.body.data;
     eventType = req.body.type;
   }
-  if (eventType === 'checkout.session.completed') {
+  if (eventType === "checkout.session.completed") {
     console.log(`Paied successfully and now is sub`);
-    changeUserToSub(data.object)
+    changeUserToSub(data.object);
   }
-  res.status(200).json({message: 'Done'});
+  res.status(200).json({ message: "Done" });
 });
-

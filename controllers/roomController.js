@@ -3,8 +3,8 @@ const sharp = require("sharp");
 const { v4: uuidv4 } = require("uuid");
 
 const { uploadMixOfImages } = require("../middleware/uploadImageMiddleware");
-const factoryHandler = require('./handler')
-const {deleteImgsFromServer} = require('../utils/deleteImages')
+const factoryHandler = require("./handler");
+const { deleteImgsFromServer } = require("../utils/deleteImages");
 const ApiError = require("../utils/apiError");
 const Room = require("../models/roomModel");
 
@@ -28,11 +28,14 @@ exports.resizeRoomImages = asyncHandler(async (req, res, next) => {
 
 exports.uploadRoomImages = uploadMixOfImages("images");
 
+// @desc Add room to the DB
+// @route POST /api/v1/rooms/
+// @access Private/User
 exports.addRoom = asyncHandler(async (req, res, next) => {
   if (!req.user.isSub) {
     const room = await Room.findOne({ owner: req.user._id });
     if (room) {
-      deleteImgsFromServer(req.body, 'Room')
+      deleteImgsFromServer(req.body, "Room");
       return next(
         new ApiError(
           "You can't add more than one room you have to be a subscriber first",
@@ -57,10 +60,23 @@ exports.addRoom = asyncHandler(async (req, res, next) => {
   res.status(201).json({ status: "Success", data: room });
 });
 
-exports.getRooms = factoryHandler.getAll(Room)
+// @desc Get all rooms data
+// @route GET /api/v1/rooms/
+// @access Private/User
 
-exports.getRoom =factoryHandler.getOne(Room)
+exports.getRooms = factoryHandler.getAll(Room);
 
-exports.updateRoom = factoryHandler.updateOne(Room)
+// @desc Get spesific room
+// @route GET /api/v1/rooms/
+// @access Private/User
+exports.getRoom = factoryHandler.getOne(Room);
 
-exports.deleteRoom = factoryHandler.deleteOne(Room, 'Room')
+// @desc Update spesific room
+// @route PUT /api/v1/rooms/
+// @access Private/User
+exports.updateRoom = factoryHandler.updateOne(Room);
+
+// @desc Delete spesific room
+// @route DELETE /api/v1/rooms/
+// @access Private/User
+exports.deleteRoom = factoryHandler.deleteOne(Room, "Room");

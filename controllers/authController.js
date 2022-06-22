@@ -9,6 +9,10 @@ const { generateToken } = require("../utils/generateToken");
 const ApiError = require("../utils/apiError");
 const User = require("../models/userModel");
 
+// @desc SignUp new user
+// @route POST /api/v1/auth/signup
+// @access Public
+
 exports.signUp = asyncHandler(async (req, res, next) => {
   const user = await User.create({
     name: req.body.name,
@@ -24,6 +28,9 @@ exports.signUp = asyncHandler(async (req, res, next) => {
   res.status(201).json({ status: "Success", data: user, token });
 });
 
+// @desc Login with user account
+// @route POST /api/v1/auth/login
+// @access Public
 exports.login = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({ email: req.body.email });
   if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
@@ -33,6 +40,9 @@ exports.login = asyncHandler(async (req, res, next) => {
   res.status(200).json({ status: "Success", data: user, token });
 });
 
+// @desc Get Logged User data
+// @route GET /api/v1/auth/
+// @access Private/User
 exports.getLoggedUserData = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user._id)
   if(!user) {
@@ -41,6 +51,9 @@ exports.getLoggedUserData = asyncHandler(async (req, res, next) => {
   res.status(200).json({ status: "Success", data: user})
 })
 
+// @desc Check the bearer token and if user signed in
+// @route Middleware
+// @access Public
 exports.auth = asyncHandler(async (req, res, next) => {
   // 1) check if token exist, if exists hold it
   let token;
@@ -73,6 +86,9 @@ exports.auth = asyncHandler(async (req, res, next) => {
   next();
 });
 
+// @desc Check the logged in user role for authorization
+// @route Middleware
+// @access Public
 exports.allowedTo = (...roles) =>
   asyncHandler(async (req, res, next) => {
     if (!roles.includes(req.user.role)) {
@@ -83,7 +99,9 @@ exports.allowedTo = (...roles) =>
     next();
   });
 
-
+// @desc Send a forget password request and send code to email
+// @route POST /api/v1/auth/forgetPassword
+// @access Public
 exports.forgetPassword = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
@@ -121,7 +139,9 @@ exports.forgetPassword = asyncHandler(async (req, res, next) => {
     .status(200)
     .json({ status: "Success", message: "Reset code sent successfully" });
 });
-
+// @desc Verify reset code 
+// @route POST /api/v1/auth/verifyResetCode
+// @access Public
 exports.verifyResetCode = asyncHandler(async (req, res, next) => {
   const hashedResetCode = crypto
     .createHash("sha256")
@@ -138,7 +158,9 @@ exports.verifyResetCode = asyncHandler(async (req, res, next) => {
   await user.save()
   res.status(200).json({ status: "success" });
 });
-
+// @desc Reset the password
+// @route PUT /api/v1/auth/resetCode
+// @access Public
 exports.resetPassword = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({email: req.body.email})
   if(!user){
