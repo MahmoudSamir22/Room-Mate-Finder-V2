@@ -4,6 +4,7 @@ const express = require("express");
 require("dotenv").config({ path: "./config.env" });
 const cors = require("cors");
 const {webHookCheckOut} = require('./controllers/userController')
+const compression = require('compression')
 
 const mountRoutes = require("./routes/index");
 const globalError = require("./middleware/errorsMiddleware");
@@ -17,6 +18,10 @@ const app = express();
 // Enable other domains to access your application
 app.use(cors());
 app.options("*", cors());
+
+//Compress Response
+app.use(compression())
+
 
 //WebHook For subscription
 app.post('/sub-webhook', express.raw({type: 'application/json'}),  webHookCheckOut)
