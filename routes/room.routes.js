@@ -16,13 +16,19 @@ const {
   updateRoomValidator,
 } = require("../utils/validators/roomValidator");
 
-const { auth } = require("../controllers/authController");
+const { auth, allowedTo } = require("../controllers/authController");
 
 router
   .route("/")
-  .post(auth, uploadRoomImages, resizeRoomImages, createRoomValidator, addRoom)
+  .post(
+    auth,
+    allowedTo("user"),
+    uploadRoomImages,
+    resizeRoomImages,
+    createRoomValidator,
+    addRoom
+  )
   .get(getRooms);
-
 
 router
   .route("/:id")

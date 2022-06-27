@@ -18,7 +18,7 @@ const {
   updateUserValidator,
 } = require("../utils/validators/userValidator");
 
-const { auth } = require("../controllers/authController");
+const { auth, allowedTo } = require("../controllers/authController");
 
 router.route("/").post(uploadUserImage, resizeProfileImage, createUserValidator, addUser).get(auth, getUsers);
 
