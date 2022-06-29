@@ -15,7 +15,7 @@ const {
   deleteRoomValidator,
   updateRoomValidator,
 } = require("../utils/validators/roomValidator");
-
+ 
 const { auth, allowedTo } = require("../controllers/authController");
 
 router
